@@ -11,6 +11,10 @@ app.get('/', (req, res) => {
   res.send('Welcome to the Video Overlay API! Use POST /upload to upload a video.');
 });
 
+app.post('/upload', upload.single('video'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).send('No file uploaded');
+  }
 
   const inputPath = path.join(__dirname, 'uploads', req.file.filename);
   const overlayPath = path.join(__dirname, 'overlay.png');
@@ -44,4 +48,3 @@ app.get('/', (req, res) => {
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Server running on port ${port}`));
-
