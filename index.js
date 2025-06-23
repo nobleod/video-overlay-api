@@ -1,52 +1,48 @@
 const express = require('express');
-const multer = require('multer');
-const { exec } = require('child_process');
-const path = require('path');
-const fs = require('fs');
+const cors = require('cors');
+const bodyParser = require('body-parser');
 
 const app = express();
-const upload = multer({ dest: 'uploads/' });
+const PORT = process.env.PORT || 3000;
 
-// Serve static files from the 'public' folder
-app.use(express.static(path.join(__dirname, 'public')));
+// Middleware
+app.use(cors());
+app.use(bodyParser.json());
 
-// Handle file upload and overlay processing
-app.post('/upload', upload.single('video'), (req, res) => {
-  if (!req.file) {
-    return res.status(400).send('No file uploaded');
+// Root route to confirm API is running
+app.get('/', (req, res) => {
+  res.send('Video Overlay API is running.');
+});
+
+// Overlay route
+app.post('/overlay', (req, res) => {
+  const { videoUrl, overlayText, position } = req.body;
+
+  // Basic validation
+  if (!videoUrl || !overlayText) {
+    return res.status(400).json({
+      error: 'Missing required fields: videoUrl and overlayText.',
+    });
   }
 
-  const inputPath = path.join(__dirname, 'uploads', req.file.filename);
-  const overlayPath = path.join(__dirname, 'overlay.png');
-  const outputFilename = `output-${Date.now()}.mp4`;
-  const outputPath = path.join(__dirname, outputFilename);
+  // Placeholder for actual video overlay logic
+  // Normally you'd call ffmpeg or a similar tool here
+  console.log('Received request for overlay:');
+  console.log('Video URL:', videoUrl);
+  console.log('Overlay Text:', overlayText);
+  console.log('Position:', position || 'default');
 
-  const ffmpegCmd = `ffmpeg -i ${inputPath} -i ${overlayPath} -filter_complex "[0:v]scale=iw*min(1920/iw\\,1080/ih):ih*min(1920/iw\\,1080/ih),pad=1920:1080:(1920 - iw*min(1920/iw\\,1080/ih))/2:(1080 - ih*min(1920/iw\\,1080/ih))/2:black[vid];[vid][1:v]overlay=0:0" -c:v libx264 -preset veryfast -c:a copy ${outputPath}`;
+  // Simulate processing
+  const outputUrl = 'https://example.com/processed-video.mp4'; // Replace with real processing output
 
-  exec(ffmpegCmd, (error, stdout, stderr) => {
-    if (error) {
-      console.error('FFmpeg error:', error);
-      console.error('FFmpeg stderr:', stderr);
-      return res.status(500).send('Processing failed');
-    }
-
-    res.download(outputPath, err => {
-      fs.unlink(inputPath, unlinkErr => {
-        if (unlinkErr) console.error('Error deleting input file:', unlinkErr);
-      });
-      fs.unlink(outputPath, unlinkErr => {
-        if (unlinkErr) console.error('Error deleting output file:', unlinkErr);
-      });
-
-      if (err) {
-        console.error('Error sending file:', err);
-      }
-    });
+  res.status(200).json({
+    message: 'Overlay processing started successfully.',
+    input: { videoUrl, overlayText, position },
+    outputUrl,
   });
 });
 
-// Start server
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+// Start the server
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
