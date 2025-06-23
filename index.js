@@ -7,10 +7,10 @@ const fs = require('fs');
 const app = express();
 const upload = multer({ dest: 'uploads/' });
 
-app.get('/', (req, res) => {
-  res.send('Welcome to the Video Overlay API! Use POST /upload to upload a video.');
-});
+// Serve static files from the 'public' folder
+app.use(express.static(path.join(__dirname, 'public')));
 
+// Handle file upload and overlay processing
 app.post('/upload', upload.single('video'), (req, res) => {
   if (!req.file) {
     return res.status(400).send('No file uploaded');
@@ -31,7 +31,7 @@ app.post('/upload', upload.single('video'), (req, res) => {
     }
 
     res.download(outputPath, err => {
-      // Delete files after response is finished or error
+      // Clean up files after sending
       fs.unlink(inputPath, unlinkErr => {
         if (unlinkErr) console.error('Error deleting input file:', unlinkErr);
       });
@@ -46,5 +46,8 @@ app.post('/upload', upload.single('video'), (req, res) => {
   });
 });
 
+// Set the port
 const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`Server running on port ${port}`));
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});
