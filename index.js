@@ -1,7 +1,3 @@
-app.get('/', (req, res) => {
-  res.send('Welcome to the Video Overlay API! Use POST /upload to upload a video.');
-});
-
 const express = require('express');
 const multer = require('multer');
 const { exec } = require('child_process');
@@ -11,10 +7,10 @@ const fs = require('fs');
 const app = express();
 const upload = multer({ dest: 'uploads/' });
 
-app.post('/upload', upload.single('video'), (req, res) => {
-  if (!req.file) {
-    return res.status(400).send('No file uploaded');
-  }
+app.get('/', (req, res) => {
+  res.send('Welcome to the Video Overlay API! Use POST /upload to upload a video.');
+});
+
 
   const inputPath = path.join(__dirname, 'uploads', req.file.filename);
   const overlayPath = path.join(__dirname, 'overlay.png');
