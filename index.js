@@ -1,3 +1,7 @@
+app.get('/', (req, res) => {
+  res.send('Welcome to the Video Overlay API! Use POST /upload to upload a video.');
+});
+
 const express = require('express');
 const multer = require('multer');
 const { exec } = require('child_process');
