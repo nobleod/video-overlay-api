@@ -10,6 +10,11 @@ const upload = multer({ dest: 'uploads/' });
 // Serve static files from the 'public' folder
 app.use(express.static(path.join(__dirname, 'public')));
 
+// HOME ROUTE
+app.get('/', (req, res) => {
+  res.send('Welcome to the Video Overlay API! Use POST /upload to upload a video.');
+});
+
 // Handle file upload and overlay processing
 app.post('/upload', upload.single('video'), (req, res) => {
   if (!req.file) {
